@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Punto de Venta — TacoSoft</title>
+  <link rel="stylesheet" href="tacosoft.css">
+</head>
+<body>
+<nav class="navbar">
+  <a class="brand" href="catalogos.html">
+    <div class="brand-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="14" cy="10" rx="12" ry="4" fill="rgba(255,255,255,0.9)"/>
+        <rect x="8" y="6" width="12" height="4" rx="2" fill="rgba(255,255,255,0.9)"/>
+        <path d="M5 15 Q14 8 23 15 Q23 22 14 23 Q5 22 5 15Z" fill="#f39c12"/>
+        <path d="M6 16 Q14 10 22 16" stroke="#e67e22" stroke-width="1" fill="none"/>
+        <ellipse cx="14" cy="17" rx="6" ry="2.5" fill="#27ae60"/>
+        <circle cx="11" cy="16" r="1.2" fill="#e74c3c"/>
+        <circle cx="14" cy="15.5" r="1.2" fill="#e74c3c"/>
+        <circle cx="17" cy="16" r="1.2" fill="#e74c3c"/>
+      </svg>
+    </div>
+    <div class="brand-texto">
+      <span class="brand-nombre">Taquería Sinaloense</span>
+      <span class="brand-subtitulo">Sistema de Punto de Venta</span>
+    </div>
+  </a>
+  <nav>
+    <a href="catalogos.html"><span class="nav-icon">📋</span> Catálogos</a>
+    <a href="pos.html" class="activo"><span class="nav-icon">🧾</span> Punto de Venta</a>
+    <a href="pedidos.html"><span class="nav-icon">📦</span> Pedidos</a>
+    <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+  </nav>
+  <div class="brand-right">"El Sinaloense" © 2026</div>
+</nav>
+
+<div class="contenedor">
+  <h1 class="titulo-pagina">🧾 Punto de Venta</h1>
+
+  <!-- Paso 1: Identificación -->
+  <div id="paso1" class="card">
+    <h3 style="margin-bottom:16px;color:var(--gris)">Paso 1 — Identificación del cajero</h3>
+    <div class="form-grid">
+      <div class="campo">
+        <label>Sucursal *</label>
+        <select id="pos_sucursal" onchange="cargarEmpleadosSucursal()">
+          <option value="">— Selecciona sucursal —</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Empleado (cajero) *</label>
+        <select id="pos_empleado">
+          <option value="">— Primero selecciona sucursal —</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Tipo de pedido *</label>
+        <select id="pos_tipo">
+          <option value="en local">En local</option>
+          <option value="para llevar">Para llevar</option>
+          <option value="a domicilio">A domicilio</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;align-items:center;gap:12px">
+      <button class="btn btn-primario" onclick="iniciarPedido()">Iniciar pedido →</button>
+    </div>
+  </div>
+
+  <!-- Pasos 2-7: POS activo (oculto hasta iniciar) -->
+  <div id="pos-activo" style="display:none">
+
+    <!-- Info del pedido activo -->
+    <div class="card" style="background:var(--rojo);color:#fff;padding:14px 20px;margin-bottom:16px">
+      <div class="flex gap-16" style="flex-wrap:wrap">
+        <span>🏪 <strong id="lbl_sucursal"></strong></span>
+        <span>👤 <strong id="lbl_empleado"></strong></span>
+        <span>📦 <strong id="lbl_tipo"></strong></span>
+        <span>🆔 Pedido #<strong id="lbl_pedido"></strong></span>
+      </div>
+    </div>
+
+    <!-- Paso 2: Cliente -->
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="color:var(--gris);margin-bottom:12px">Paso 2 — Cliente (opcional)</h3>
+      <div class="flex" style="flex-wrap:wrap;gap:10px">
+        <input id="busca_cliente" type="text" placeholder="Nombre o teléfono..." style="flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--borde);border-radius:var(--radio)">
+        <button class="btn btn-secundario" onclick="buscarCliente()">🔍 Buscar</button>
+        <button class="btn btn-secundario" onclick="abrirRegistroCliente()">➕ Nuevo cliente</button>
+        <button class="btn btn-secundario" onclick="sinCliente()">👥 Público general</button>
+      </div>
+      <div id="resultados_cliente" style="margin-top:10px"></div>
+      <div id="cliente_seleccionado" style="margin-top:8px;padding:8px 12px;border-radius:var(--radio);background:var(--verde-lite);color:var(--verde);display:none;font-weight:600"></div>
+    </div>
+
+    <!-- Pasos 3-6: Menú + Ticket -->
+    <div class="pos-grid">
+      <!-- Menú -->
+      <div>
+        <div class="card" style="padding:14px">
+          <h3 style="color:var(--gris);margin-bottom:12px">Paso 4 — Seleccionar productos</h3>
+          <div class="cat-tabs" id="cats_pos"></div>
+          <div class="productos-grid" id="productos_pos"></div>
+        </div>
+      </div>
+
+      <!-- Ticket -->
+      <div>
+        <div class="ticket">
+          <h3 style="color:var(--gris)">🧾 Resumen del pedido</h3>
+          <div id="ticket_items" style="min-height:60px">
+            <p class="texto-muted texto-centro" style="padding:20px 0">Sin productos aún</p>
+          </div>
+          <div class="ticket-total">
+            <span>Total</span>
+            <span id="ticket_total">$0.00</span>
+          </div>
+
+          <!-- Paso 6: Promoción -->
+          <div>
+            <label style="font-size:.82rem;font-weight:600;color:var(--gris-mid)">Paso 6 — Aplicar promoción (opcional)</label>
+            <div class="flex mt-8" style="gap:8px">
+              <select id="sel_promo" style="flex:1;padding:8px 12px;border:1px solid var(--borde);border-radius:var(--radio);font-size:.875rem">
+                <option value="">Sin promoción</option>
+              </select>
+              <button class="btn btn-secundario" onclick="aplicarPromo()">Aplicar</button>
+            </div>
+          </div>
+
+          <!-- Paso 7: Confirmar -->
+          <button class="btn btn-verde" style="width:100%;justify-content:center;padding:12px" onclick="confirmarPedido()">
+            ✅ Confirmar pedido
+          </button>
+          <button class="btn btn-peligro btn-icono" style="width:100%;justify-content:center" onclick="cancelarPedidoActual()">
+            🚫 Cancelar pedido
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nuevo cliente desde POS -->
+<div class="modal-overlay" id="modalNuevoCliente">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Registrar nuevo cliente</h3>
+      <button class="btn-cerrar" onclick="cerrarModal('modalNuevoCliente')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="campo" style="grid-column:1/-1"><label>Nombre *</label><input id="nc_nombre" placeholder="Nombre completo"></div>
+      <div class="campo"><label>Teléfono</label><input id="nc_tel" placeholder="667-000-0000"></div>
+      <div class="campo"><label>Correo</label><input id="nc_correo" type="email" placeholder="correo@gmail.com"></div>
+      <div class="campo"><label>Ciudad</label><input id="nc_ciudad" placeholder="Culiacán"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secundario" onclick="cerrarModal('modalNuevoCliente')">Cancelar</button>
+      <button class="btn btn-primario" onclick="registrarNuevoCliente()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="api.js"></script>
+<script>
+// ══ Estado POS ══
+let pedidoActual    = null;   // id del pedido en BD
+let clienteActual   = null;   // {id_cliente, nombre} o null
+let productosMenu   = [];
+let categorias      = [];
+let categoriaActiva = null;
+let promoVigentes   = [];
+
+function toast(msg, tipo='exito') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `show ${tipo}`;
+  setTimeout(() => t.className = '', 2800);
+}
+function cerrarModal(id) { document.getElementById(id).classList.remove('abierto'); }
+function fmt(n) { return '$' + Number(n).toFixed(2); }
+
+// ══ Paso 1: Inicializar ══
+async function initPOS() {
+  try {
+    const sucs = await api.getSucursales();
+    const sel  = document.getElementById('pos_sucursal');
+    sel.innerHTML = '<option value="">— Selecciona sucursal —</option>' +
+      sucs.filter(s => s.estatus === 'activa').map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+  } catch(e) { toast('Error al cargar sucursales: ' + e.message, 'error'); }
+}
+
+async function cargarEmpleadosSucursal() {
+  const id = document.getElementById('pos_sucursal').value;
+  const sel = document.getElementById('pos_empleado');
+  if (!id) { sel.innerHTML = '<option value="">— Primero selecciona sucursal —</option>'; return; }
+  try {
+    const emps = await api.getEmpleados(id);
+    const cajeros = emps.filter(e => (e.puesto === 'cajero' || e.puesto === 'gerente') && e.estatus === 'activo');
+    sel.innerHTML = '<option value="">— Selecciona cajero —</option>' +
+      cajeros.map(e => `<option value="${e.id_empleado}">${e.nombre_completo} (${e.puesto})</option>`).join('');
+  } catch(e) { toast('Error al cargar empleados: ' + e.message, 'error'); }
+}
+
+async function iniciarPedido() {
+  const id_sucursal = parseInt(document.getElementById('pos_sucursal').value);
+  const id_empleado = parseInt(document.getElementById('pos_empleado').value);
+  const tipo_pedido = document.getElementById('pos_tipo').value;
+
+  if (!id_sucursal || !id_empleado) return toast('Selecciona sucursal y empleado.', 'error');
+
+  try {
+    const res = await api.nuevoPedido({ id_sucursal, id_empleado, id_cliente: null, tipo_pedido });
+    pedidoActual = res.id_pedido;
+
+    document.getElementById('lbl_sucursal').textContent = document.getElementById('pos_sucursal').options[document.getElementById('pos_sucursal').selectedIndex].text;
+    document.getElementById('lbl_empleado').textContent = document.getElementById('pos_empleado').options[document.getElementById('pos_empleado').selectedIndex].text;
+    document.getElementById('lbl_tipo').textContent     = tipo_pedido;
+    document.getElementById('lbl_pedido').textContent   = pedidoActual;
+
+    document.getElementById('paso1').style.display     = 'none';
+    document.getElementById('pos-activo').style.display = '';
+
+    await cargarMenu();
+    await cargarPromociones();
+    toast(`Pedido #${pedidoActual} iniciado.`);
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ══ Paso 2: Cliente ══
+async function buscarCliente() {
+  const q = document.getElementById('busca_cliente').value.trim();
+  if (!q) return toast('Escribe un nombre o teléfono para buscar.', 'error');
+  try {
+    const res = await api.buscarCliente(q);
+    const div = document.getElementById('resultados_cliente');
+    if (!res.length) { div.innerHTML = '<p class="texto-muted">Sin resultados. Puedes registrarlo como nuevo.</p>'; return; }
+    div.innerHTML = res.map(c => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--borde)">
+        <span><strong>${c.nombre}</strong> — ${c.telefono||''}  ${c.ciudad||''}</span>
+        <button class="btn btn-verde btn-icono" onclick="seleccionarCliente(${c.id_cliente},'${c.nombre.replace(/'/g,"\\'")}')">Seleccionar</button>
+      </div>`).join('');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function seleccionarCliente(id, nombre) {
+  clienteActual = { id_cliente: id, nombre };
+  const div = document.getElementById('cliente_seleccionado');
+  div.textContent = `✅ Cliente: ${nombre}`;
+  div.style.display = '';
+  document.getElementById('resultados_cliente').innerHTML = '';
+  toast(`Cliente ${nombre} seleccionado.`);
+}
+
+function sinCliente() {
+  clienteActual = null;
+  document.getElementById('cliente_seleccionado').style.display = 'none';
+  document.getElementById('resultados_cliente').innerHTML = '';
+  toast('Pedido como público general.');
+}
+
+function abrirRegistroCliente() { document.getElementById('modalNuevoCliente').classList.add('abierto'); }
+
+async function registrarNuevoCliente() {
+  const data = {
+    nombre:   document.getElementById('nc_nombre').value.trim(),
+    telefono: document.getElementById('nc_tel').value.trim()    || null,
+    correo:   document.getElementById('nc_correo').value.trim() || null,
+    ciudad:   document.getElementById('nc_ciudad').value.trim() || null,
+  };
+  if (!data.nombre) return toast('El nombre es obligatorio.', 'error');
+  try {
+    const res = await api.crearCliente(data);
+    seleccionarCliente(res.id_cliente, data.nombre);
+    cerrarModal('modalNuevoCliente');
+    toast('Cliente registrado y seleccionado.');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ══ Pasos 4-5: Menú ══
+async function cargarMenu() {
+  try {
+    productosMenu = await api.getProductosDisponibles();
+    // Agrupar categorías únicas
+    const catSet = {};
+    productosMenu.forEach(p => { catSet[p.id_categoria] = p.categoria_nombre; });
+    categorias = Object.entries(catSet).map(([id, nombre]) => ({ id: parseInt(id), nombre }));
+
+    const tabs = document.getElementById('cats_pos');
+    tabs.innerHTML = categorias.map(c =>
+      `<button class="cat-tab${categoriaActiva===c.id?' activo':''}" onclick="filtrarCategoria(${c.id})">${c.nombre}</button>`
+    ).join('');
+
+    filtrarCategoria(categorias[0]?.id);
+  } catch(e) { toast('Error al cargar menú: ' + e.message, 'error'); }
+}
+
+function filtrarCategoria(id) {
+  categoriaActiva = id;
+  document.querySelectorAll('#cats_pos .cat-tab').forEach((t, i) => t.classList.toggle('activo', categorias[i]?.id === id));
+  const filtrados = productosMenu.filter(p => p.id_categoria === id);
+  document.getElementById('productos_pos').innerHTML = filtrados.map(p => `
+    <div class="prod-card" onclick="agregarAlTicket(${p.id_producto})">
+      <div class="nombre">${p.nombre}</div>
+      <div class="precio">$${Number(p.precio_actual).toFixed(2)}</div>
+    </div>`).join('');
+}
+
+// ══ Ticket ══
+let ticket = {};  // { id_producto: { nombre, precio, cantidad } }
+
+async function agregarAlTicket(id_producto) {
+  if (!pedidoActual) return toast('Inicia el pedido primero.', 'error');
+  try {
+    await api.agregarProducto(pedidoActual, { id_producto, cantidad: 1 });
+    const prod = productosMenu.find(p => p.id_producto === id_producto);
+    if (ticket[id_producto]) ticket[id_producto].cantidad++;
+    else ticket[id_producto] = { nombre: prod.nombre, precio: prod.precio_actual, cantidad: 1 };
+    renderTicket();
+    toast(`${prod.nombre} agregado.`);
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function renderTicket() {
+  const items = Object.entries(ticket);
+  const div = document.getElementById('ticket_items');
+  if (!items.length) { div.innerHTML = '<p class="texto-muted texto-centro" style="padding:20px 0">Sin productos aún</p>'; document.getElementById('ticket_total').textContent = '$0.00'; return; }
+  div.innerHTML = items.map(([id, item]) => `
+    <div class="ticket-item">
+      <span class="nombre">${item.nombre}</span>
+      <span class="controles">
+        <button onclick="cambiarCantidad(${id}, -1)">−</button>
+        <span style="min-width:20px;text-align:center">${item.cantidad}</span>
+        <button onclick="cambiarCantidad(${id}, 1)">+</button>
+      </span>
+      <span class="subtotal">$${(item.precio * item.cantidad).toFixed(2)}</span>
+    </div>`).join('');
+  const total = items.reduce((s,[,i]) => s + i.precio * i.cantidad, 0);
+  document.getElementById('ticket_total').textContent = '$' + total.toFixed(2);
+}
+
+async function cambiarCantidad(id_producto, delta) {
+  id_producto = parseInt(id_producto);
+  if (delta > 0) {
+    await api.agregarProducto(pedidoActual, { id_producto, cantidad: 1 });
+    ticket[id_producto].cantidad++;
+  } else {
+    if (ticket[id_producto].cantidad <= 1) { delete ticket[id_producto]; }
+    else { ticket[id_producto].cantidad--; }
+    // Nota: el SP no tiene removeProducto; se recrea el pedido si necesitan quitar.
+    // En un entorno real se agrega sp_QuitarProductoDelPedido.
+  }
+  renderTicket();
+}
+
+// ══ Paso 6: Promoción ══
+async function cargarPromociones() {
+  try {
+    promoVigentes = await api.getPromoVigentes();
+    // Agrupar por id_promocion para evitar duplicados
+    const promoMap = {};
+    promoVigentes.forEach(p => { promoMap[p.id_promocion] = p; });
+    const unicas = Object.values(promoMap);
+    const sel = document.getElementById('sel_promo');
+    sel.innerHTML = '<option value="">Sin promoción</option>' +
+      unicas.map(p => `<option value="${p.id_promocion}">${p.nombre} (${p.porcentaje_descuento}%)</option>`).join('');
+  } catch(e) { /* sin promos vigentes */ }
+}
+
+async function aplicarPromo() {
+  const id_promocion = parseInt(document.getElementById('sel_promo').value);
+  if (!id_promocion) return toast('Selecciona una promoción.', 'error');
+  if (!Object.keys(ticket).length) return toast('Agrega productos primero.', 'error');
+  try {
+    await api.aplicarPromocion(pedidoActual, { id_promocion });
+    // Actualizar precios en el ticket localmente con el descuento
+    const promo = promoVigentes.find(p => p.id_promocion === id_promocion);
+    if (promo) {
+      Object.keys(ticket).forEach(id => {
+        if (parseInt(id) === promo.id_producto) {
+          ticket[id].precio = ticket[id].precio * (1 - promo.porcentaje_descuento / 100);
+        }
+      });
+      renderTicket();
+    }
+    toast('Promoción aplicada correctamente.');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ══ Paso 7: Confirmar ══
+async function confirmarPedido() {
+  if (!Object.keys(ticket).length) return toast('Agrega al menos un producto.', 'error');
+  if (!confirm(`¿Confirmar el pedido #${pedidoActual}?`)) return;
+  try {
+    await api.confirmarPedido(pedidoActual);
+    toast(`✅ Pedido #${pedidoActual} confirmado y enviado a cocina.`);
+    resetPOS();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function cancelarPedidoActual() {
+  if (!confirm('¿Cancelar este pedido?')) return;
+  try {
+    await api.cancelarPedido(pedidoActual, 'Cancelado desde POS');
+    toast('Pedido cancelado.');
+    resetPOS();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function resetPOS() {
+  pedidoActual  = null;
+  clienteActual = null;
+  ticket        = {};
+  document.getElementById('pos-activo').style.display = 'none';
+  document.getElementById('paso1').style.display      = '';
+  document.getElementById('pos_sucursal').value       = '';
+  document.getElementById('pos_empleado').innerHTML   = '<option value="">— Primero selecciona sucursal —</option>';
+  document.getElementById('cliente_seleccionado').style.display = 'none';
+  document.getElementById('resultados_cliente').innerHTML       = '';
+}
+
+document.addEventListener('DOMContentLoaded', initPOS);
+</script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Pedidos — TacoSoft</title>
+  <link rel="stylesheet" href="tacosoft.css">
+</head>
+<body>
+<nav class="navbar">
+  <a class="brand" href="catalogos.html">
+    <div class="brand-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="14" cy="10" rx="12" ry="4" fill="rgba(255,255,255,0.9)"/>
+        <rect x="8" y="6" width="12" height="4" rx="2" fill="rgba(255,255,255,0.9)"/>
+        <path d="M5 15 Q14 8 23 15 Q23 22 14 23 Q5 22 5 15Z" fill="#f39c12"/>
+        <path d="M6 16 Q14 10 22 16" stroke="#e67e22" stroke-width="1" fill="none"/>
+        <ellipse cx="14" cy="17" rx="6" ry="2.5" fill="#27ae60"/>
+        <circle cx="11" cy="16" r="1.2" fill="#e74c3c"/>
+        <circle cx="14" cy="15.5" r="1.2" fill="#e74c3c"/>
+        <circle cx="17" cy="16" r="1.2" fill="#e74c3c"/>
+      </svg>
+    </div>
+    <div class="brand-texto">
+      <span class="brand-nombre">Taquería Sinaloense</span>
+      <span class="brand-subtitulo">Sistema de Punto de Venta</span>
+    </div>
+  </a>
+  <nav>
+    <a href="catalogos.html"><span class="nav-icon">📋</span> Catálogos</a>
+    <a href="pos.html"><span class="nav-icon">🧾</span> Punto de Venta</a>
+    <a href="pedidos.html" class="activo"><span class="nav-icon">📦</span> Pedidos</a>
+    <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+  </nav>
+  <div class="brand-right">"El Sinaloense" © 2026</div>
+</nav>
+
+<div class="contenedor">
+  <h1 class="titulo-pagina">📦 Gestión de Pedidos</h1>
+
+  <!-- Filtros -->
+  <div class="card">
+    <div class="toolbar">
+      <select id="filtro_sucursal" onchange="cargarPedidos()" style="padding:8px 12px;border:1px solid var(--borde);border-radius:var(--radio)">
+        <option value="">Todas las sucursales</option>
+      </select>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-secundario" id="btn-todos"       onclick="filtrarEstatus('')">Todos</button>
+        <button class="btn" id="btn-pendiente"  style="background:#fef9e7;color:#9a7d0a;border:1px solid #f9e79f" onclick="filtrarEstatus('pendiente')">⏳ Pendiente</button>
+        <button class="btn" id="btn-preparando" style="background:#fdf2e9;color:#935116;border:1px solid #fad7a0" onclick="filtrarEstatus('preparando')">🔥 Preparando</button>
+        <button class="btn" id="btn-listo"      style="background:#ebf5fb;color:#1a5276;border:1px solid #aed6f1" onclick="filtrarEstatus('listo')">✅ Listo</button>
+        <button class="btn" id="btn-entregado"  style="background:var(--verde-lite);color:var(--verde);border:1px solid #a9dfbf" onclick="filtrarEstatus('entregado')">🎉 Entregado</button>
+        <button class="btn" id="btn-cancelado"  style="background:var(--rojo-lite);color:var(--rojo);border:1px solid #f1948a" onclick="filtrarEstatus('cancelado')">🚫 Cancelado</button>
+      </div>
+      <button class="btn btn-primario" onclick="cargarPedidos()">🔄 Actualizar</button>
+    </div>
+
+    <div class="tabla-wrap">
+      <table id="tbPedidos">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Sucursal</th>
+            <th>Empleado</th>
+            <th>Cliente</th>
+            <th>Fecha / Hora</th>
+            <th>Tipo</th>
+            <th>Estatus</th>
+            <th>Total</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="bodyPedidos">
+          <tr><td colspan="9" class="vacio">Cargando pedidos...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detalle del pedido -->
+<div class="modal-overlay" id="modalDetalle">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <h3 id="titDetalle">Detalle del pedido</h3>
+      <button class="btn-cerrar" onclick="cerrarModal('modalDetalle')">✕</button>
+    </div>
+    <div id="detalle_encabezado" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;font-size:.875rem"></div>
+    <div class="tabla-wrap">
+      <table id="tbDetalle">
+        <thead><tr><th>Producto</th><th>Categoría</th><th>Cant.</th><th>Precio Unit.</th><th>Subtotal</th></tr></thead>
+        <tbody id="bodyDetalle"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;font-size:1rem;font-weight:700">
+      Total: <span id="detalle_total" style="color:var(--rojo);margin-left:8px"></span>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secundario" onclick="cerrarModal('modalDetalle')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="api.js"></script>
+<script>
+let estatusActivo = '';
+
+function toast(msg, tipo='exito') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `show ${tipo}`;
+  setTimeout(() => t.className = '', 2800);
+}
+function cerrarModal(id) { document.getElementById(id).classList.remove('abierto'); }
+function fmt(n)    { return '$' + Number(n).toFixed(2); }
+function fmtDT(dt) {
+  if (!dt) return '—';
+  const d = new Date(dt);
+  return d.toLocaleDateString('es-MX') + ' ' + d.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+}
+
+function badgeEstatus(e) {
+  const m = {
+    pendiente:  'badge-amarillo',
+    preparando: 'badge-naranja',
+    listo:      'badge-azul',
+    entregado:  'badge-verde',
+    cancelado:  'badge-rojo',
+  };
+  const icons = { pendiente:'⏳', preparando:'🔥', listo:'✅', entregado:'🎉', cancelado:'🚫' };
+  return `<span class="badge ${m[e]||'badge-gris'}">${icons[e]||''} ${e}</span>`;
+}
+
+function accionesEstatus(pedido) {
+  const btns = [];
+  if (pedido.estatus === 'preparando' || pedido.estatus === 'listo')
+    btns.push(`<button class="btn btn-verde btn-icono" onclick="avanzar(${pedido.id_pedido})">▶ Avanzar</button>`);
+  if (pedido.estatus === 'pendiente' || pedido.estatus === 'preparando')
+    btns.push(`<button class="btn btn-peligro btn-icono" onclick="cancelar(${pedido.id_pedido})">🚫 Cancelar</button>`);
+  btns.push(`<button class="btn btn-secundario btn-icono" onclick="verDetalle(${pedido.id_pedido})">🔍 Ver</button>`);
+  return btns.join(' ');
+}
+
+async function initPedidos() {
+  try {
+    const sucs = await api.getSucursales();
+    const sel  = document.getElementById('filtro_sucursal');
+    sel.innerHTML = '<option value="">Todas las sucursales</option>' +
+      sucs.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+  } catch(e) { toast('Error al cargar sucursales: ' + e.message, 'error'); }
+  cargarPedidos();
+}
+
+function filtrarEstatus(est) {
+  estatusActivo = est;
+  cargarPedidos();
+}
+
+async function cargarPedidos() {
+  const suc = document.getElementById('filtro_sucursal').value;
+  try {
+    const pedidos = await api.getPedidos(suc, estatusActivo);
+    const body    = document.getElementById('bodyPedidos');
+    if (!pedidos.length) {
+      body.innerHTML = '<tr><td colspan="9" class="vacio">No hay pedidos con ese filtro.</td></tr>';
+      return;
+    }
+    body.innerHTML = pedidos.map(p => `
+      <tr>
+        <td><strong>#${p.id_pedido}</strong></td>
+        <td>${p.sucursal}</td>
+        <td>${p.empleado}</td>
+        <td>${p.cliente}</td>
+        <td>${fmtDT(p.fecha_hora)}</td>
+        <td>${p.tipo_pedido}</td>
+        <td>${badgeEstatus(p.estatus)}</td>
+        <td><strong>${fmt(p.total)}</strong></td>
+        <td>${accionesEstatus(p)}</td>
+      </tr>`).join('');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function avanzar(id) {
+  try {
+    await api.avanzarPedido(id);
+    toast(`Pedido #${id} avanzado de estatus.`);
+    cargarPedidos();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function cancelar(id) {
+  const motivo = prompt(`¿Motivo de cancelación del pedido #${id}?`);
+  if (motivo === null) return;
+  try {
+    await api.cancelarPedido(id, motivo);
+    toast(`Pedido #${id} cancelado.`);
+    cargarPedidos();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function verDetalle(id) {
+  try {
+    const { encabezado: e, detalle } = await api.getDetallePedido(id);
+    document.getElementById('titDetalle').textContent = `Pedido #${e.id_pedido} — ${e.estatus}`;
+    document.getElementById('detalle_encabezado').innerHTML = `
+      <div><span class="texto-muted">Sucursal</span><br><strong>${e.sucursal}</strong></div>
+      <div><span class="texto-muted">Empleado</span><br><strong>${e.empleado}</strong></div>
+      <div><span class="texto-muted">Cliente</span><br><strong>${e.cliente}</strong></div>
+      <div><span class="texto-muted">Fecha / hora</span><br><strong>${fmtDT(e.fecha_hora)}</strong></div>
+      <div><span class="texto-muted">Tipo</span><br><strong>${e.tipo_pedido}</strong></div>
+      <div><span class="texto-muted">Promoción</span><br><strong>${e.promocion_aplicada || 'Ninguna'}</strong></div>`;
+    document.getElementById('bodyDetalle').innerHTML = detalle.map(d => `
+      <tr>
+        <td>${d.producto}</td>
+        <td>${d.categoria}</td>
+        <td>${d.cantidad}</td>
+        <td>${fmt(d.precio_unitario)}</td>
+        <td><strong>${fmt(d.subtotal)}</strong></td>
+      </tr>`).join('');
+    document.getElementById('detalle_total').textContent = fmt(e.total);
+    document.getElementById('modalDetalle').classList.add('abierto');
+  } catch(ex) { toast(ex.message, 'error'); }
+}
+
+document.addEventListener('DOMContentLoaded', initPedidos);
+
+// Auto-refresh cada 30 segundos para ver nuevos pedidos
+setInterval(() => { if (!document.getElementById('modalDetalle').classList.contains('abierto')) cargarPedidos(); }, 30000);
+</script>
+</body>
+</html>
