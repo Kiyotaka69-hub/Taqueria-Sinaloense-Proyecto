@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogos — TacoSoft</title>
+  <link rel="stylesheet" href="tacosoft.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="brand" href="catalogos.html">
+    <div class="brand-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="14" cy="10" rx="12" ry="4" fill="rgba(255,255,255,0.9)"/>
+        <rect x="8" y="6" width="12" height="4" rx="2" fill="rgba(255,255,255,0.9)"/>
+        <path d="M5 15 Q14 8 23 15 Q23 22 14 23 Q5 22 5 15Z" fill="#f39c12"/>
+        <path d="M6 16 Q14 10 22 16" stroke="#e67e22" stroke-width="1" fill="none"/>
+        <ellipse cx="14" cy="17" rx="6" ry="2.5" fill="#27ae60"/>
+        <circle cx="11" cy="16" r="1.2" fill="#e74c3c"/>
+        <circle cx="14" cy="15.5" r="1.2" fill="#e74c3c"/>
+        <circle cx="17" cy="16" r="1.2" fill="#e74c3c"/>
+      </svg>
+    </div>
+    <div class="brand-texto">
+      <span class="brand-nombre">Taquería Sinaloense</span>
+      <span class="brand-subtitulo">Sistema de Punto de Venta</span>
+    </div>
+  </a>
+  <nav>
+    <a href="catalogos.html" class="activo"><span class="nav-icon">📋</span> Catálogos</a>
+    <a href="pos.html"><span class="nav-icon">🧾</span> Punto de Venta</a>
+    <a href="pedidos.html"><span class="nav-icon">📦</span> Pedidos</a>
+    <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+  </nav>
+  <div class="brand-right">"El Sinaloense" © 2026</div>
+</nav>
+
+<div class="contenedor">
+  <h1 class="titulo-pagina">📋 Catálogos del Sistema</h1>
+
+  <!-- Tabs de sección -->
+  <div class="cat-tabs" style="margin-bottom:20px">
+    <button class="cat-tab activo" onclick="verSeccion('sucursales')">Sucursales</button>
+    <button class="cat-tab" onclick="verSeccion('categorias')">Categorías</button>
+    <button class="cat-tab" onclick="verSeccion('productos')">Productos</button>
+    <button class="cat-tab" onclick="verSeccion('empleados')">Empleados</button>
+    <button class="cat-tab" onclick="verSeccion('clientes')">Clientes</button>
+    <button class="cat-tab" onclick="verSeccion('promociones')">Promociones</button>
+  </div>
+
+  <!-- ══════════ SUCURSALES ══════════ -->
+  <section id="sec-sucursales" class="card">
+    <div class="toolbar">
+      <input type="text" id="buscaSuc" placeholder="Buscar sucursal..." oninput="filtrarTabla('tbSuc', this.value)">
+      <button class="btn btn-primario" onclick="abrirModal('sucursal')">+ Nueva Sucursal</button>
+    </div>
+    <div class="tabla-wrap">
+      <table id="tbSuc">
+        <thead><tr><th>Nombre</th><th>Ciudad</th><th>Dirección</th><th>Teléfono</th><th>Estatus</th><th>Acciones</th></tr></thead>
+        <tbody id="bodySuc"><tr><td colspan="6" class="vacio">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════ CATEGORIAS ══════════ -->
+  <section id="sec-categorias" class="card" style="display:none">
+    <div class="toolbar">
+      <input type="text" placeholder="Buscar categoría..." oninput="filtrarTabla('tbCat', this.value)">
+      <button class="btn btn-primario" onclick="abrirModal('categoria')">+ Nueva Categoría</button>
+    </div>
+    <div class="tabla-wrap">
+      <table id="tbCat">
+        <thead><tr><th>Nombre</th><th>Descripción</th><th>Acciones</th></tr></thead>
+        <tbody id="bodyCat"><tr><td colspan="3" class="vacio">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════ PRODUCTOS ══════════ -->
+  <section id="sec-productos" class="card" style="display:none">
+    <div class="toolbar">
+      <input type="text" placeholder="Buscar producto..." oninput="filtrarTabla('tbProd', this.value)">
+      <select id="filtroCategoria" onchange="cargarProductos()" style="padding:8px 12px;border:1px solid var(--borde);border-radius:var(--radio)">
+        <option value="">Todas las categorías</option>
+      </select>
+      <button class="btn btn-primario" onclick="abrirModal('producto')">+ Nuevo Producto</button>
+    </div>
+    <div class="tabla-wrap">
+      <table id="tbProd">
+        <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Costo</th><th>Estatus</th><th>Acciones</th></tr></thead>
+        <tbody id="bodyProd"><tr><td colspan="6" class="vacio">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════ EMPLEADOS ══════════ -->
+  <section id="sec-empleados" class="card" style="display:none">
+    <div class="toolbar">
+      <input type="text" placeholder="Buscar empleado..." oninput="filtrarTabla('tbEmp', this.value)">
+      <select id="filtroSucEmp" onchange="cargarEmpleados()" style="padding:8px 12px;border:1px solid var(--borde);border-radius:var(--radio)">
+        <option value="">Todas las sucursales</option>
+      </select>
+      <button class="btn btn-primario" onclick="abrirModal('empleado')">+ Nuevo Empleado</button>
+    </div>
+    <div class="tabla-wrap">
+      <table id="tbEmp">
+        <thead><tr><th>Nombre</th><th>Puesto</th><th>Sucursal</th><th>Salario Q.</th><th>Ingreso</th><th>Estatus</th><th>Acciones</th></tr></thead>
+        <tbody id="bodyEmp"><tr><td colspan="7" class="vacio">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════ CLIENTES ══════════ -->
+  <section id="sec-clientes" class="card" style="display:none">
+    <div class="toolbar">
+      <input type="text" placeholder="Buscar cliente..." oninput="filtrarTabla('tbCli', this.value)">
+      <button class="btn btn-primario" onclick="abrirModal('cliente')">+ Nuevo Cliente</button>
+    </div>
+    <div class="tabla-wrap">
+      <table id="tbCli">
+        <thead><tr><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Ciudad</th><th>Registro</th><th>Acciones</th></tr></thead>
+        <tbody id="bodyCli"><tr><td colspan="6" class="vacio">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════ PROMOCIONES ══════════ -->
+  <section id="sec-promociones" class="card" style="display:none">
+    <div class="toolbar">
+      <input type="text" placeholder="Buscar promoción..." oninput="filtrarTabla('tbPromo', this.value)">
+      <button class="btn btn-primario" onclick="abrirModal('promocion')">+ Nueva Promoción</button>
+    </div>
+    <div class="tabla-wrap">
+      <table id="tbPromo">
+        <thead><tr><th>Nombre</th><th>Descuento</th><th>Inicio</th><th>Fin</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody id="bodyPromo"><tr><td colspan="6" class="vacio">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════ MODALES ══════════ -->
+
+<!-- Modal Sucursal -->
+<div class="modal-overlay" id="modalSucursal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="tituloSuc">Nueva Sucursal</h3>
+      <button class="btn-cerrar" onclick="cerrarModal('modalSucursal')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="campo"><label>Nombre *</label><input id="suc_nombre" placeholder="El Sinaloense Culiacán"></div>
+      <div class="campo"><label>Ciudad *</label><input id="suc_ciudad" placeholder="Culiacán"></div>
+      <div class="campo" style="grid-column:1/-1"><label>Dirección *</label><input id="suc_direccion" placeholder="Blvd. Zapata 1450..."></div>
+      <div class="campo"><label>Teléfono *</label><input id="suc_telefono" placeholder="667-100-1111"></div>
+      <div class="campo"><label>Estatus</label>
+        <select id="suc_estatus"><option value="activa">Activa</option><option value="cerrada">Cerrada</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secundario" onclick="cerrarModal('modalSucursal')">Cancelar</button>
+      <button class="btn btn-primario" onclick="guardarSucursal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Categoría -->
+<div class="modal-overlay" id="modalCategoria">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="tituloCat">Nueva Categoría</h3>
+      <button class="btn-cerrar" onclick="cerrarModal('modalCategoria')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="campo"><label>Nombre *</label><input id="cat_nombre" placeholder="Tacos"></div>
+      <div class="campo" style="grid-column:1/-1"><label>Descripción</label><input id="cat_desc" placeholder="Descripción de la categoría"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secundario" onclick="cerrarModal('modalCategoria')">Cancelar</button>
+      <button class="btn btn-primario" onclick="guardarCategoria()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Producto -->
+<div class="modal-overlay" id="modalProducto">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="tituloProd">Nuevo Producto</h3>
+      <button class="btn-cerrar" onclick="cerrarModal('modalProducto')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="campo" style="grid-column:1/-1"><label>Nombre *</label><input id="prod_nombre" placeholder="Taco de Birria"></div>
+      <div class="campo"><label>Categoría *</label><select id="prod_categoria"></select></div>
+      <div class="campo"><label>Estatus</label>
+        <select id="prod_estatus"><option value="disponible">Disponible</option><option value="no disponible">No disponible</option></select>
+      </div>
+      <div class="campo"><label>Precio de venta *</label><input id="prod_precio" type="number" step="0.01" placeholder="28.00"></div>
+      <div class="campo"><label>Costo de preparación *</label><input id="prod_costo" type="number" step="0.01" placeholder="10.00"></div>
+      <div class="campo" style="grid-column:1/-1"><label>Descripción</label><input id="prod_desc" placeholder="Descripción del producto"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secundario" onclick="cerrarModal('modalProducto')">Cancelar</button>
+      <button class="btn btn-primario" onclick="guardarProducto()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Empleado -->
+<div class="modal-overlay" id="modalEmpleado">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="tituloEmp">Nuevo Empleado</h3>
+      <button class="btn-cerrar" onclick="cerrarModal('modalEmpleado')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="campo" style="grid-column:1/-1"><label>Nombre completo *</label><input id="emp_nombre" placeholder="María Elena Ríos Valenzuela"></div>
+      <div class="campo"><label>Teléfono *</label><input id="emp_tel" placeholder="667-111-0001"></div>
+      <div class="campo"><label>Puesto *</label>
+        <select id="emp_puesto">
+          <option value="cajero">Cajero</option>
+          <option value="cocinero">Cocinero</option>
+          <option value="repartidor">Repartidor</option>
+          <option value="gerente">Gerente</option>
+        </select>
+      </div>
+      <div class="campo"><label>Sucursal *</label><select id="emp_sucursal"></select></div>
+      <div class="campo"><label>Salario quincenal *</label><input id="emp_salario" type="number" step="0.01" placeholder="4200.00"></div>
+      <div class="campo"><label>Fecha de ingreso *</label><input id="emp_fecha" type="date"></div>
+      <div class="campo"><label>Estatus</label>
+        <select id="emp_estatus"><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secundario" onclick="cerrarModal('modalEmpleado')">Cancelar</button>
+      <button class="btn btn-primario" onclick="guardarEmpleado()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cliente -->
+<div class="modal-overlay" id="modalCliente">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="tituloCli">Nuevo Cliente</h3>
+      <button class="btn-cerrar" onclick="cerrarModal('modalCliente')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="campo" style="grid-column:1/-1"><label>Nombre *</label><input id="cli_nombre" placeholder="Sofía Gámez Arámburo"></div>
+      <div class="campo"><label>Teléfono</label><input id="cli_tel" placeholder="667-501-0001"></div>
+      <div class="campo"><label>Correo</label><input id="cli_correo" type="email" placeholder="sofia@gmail.com"></div>
+      <div class="campo"><label>Ciudad</label><input id="cli_ciudad" placeholder="Culiacán"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secundario" onclick="cerrarModal('modalCliente')">Cancelar</button>
+      <button class="btn btn-primario" onclick="guardarCliente()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Promoción -->
+<div class="modal-overlay" id="modalPromocion">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <h3 id="tituloPromo">Nueva Promoción</h3>
+      <button class="btn-cerrar" onclick="cerrarModal('modalPromocion')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="campo" style="grid-column:1/-1"><label>Nombre *</label><input id="promo_nombre" placeholder="Promo Verano Sinaloense"></div>
+      <div class="campo"><label>Descuento % *</label><input id="promo_pct" type="number" step="0.01" min="0" max="100" placeholder="20"></div>
+      <div class="campo"><label>Fecha inicio *</label><input id="promo_inicio" type="date"></div>
+      <div class="campo"><label>Fecha fin *</label><input id="promo_fin" type="date"></div>
+      <div class="campo" style="grid-column:1/-1"><label>Descripción</label><input id="promo_desc" placeholder="Descripción de la promoción"></div>
+      <div class="campo" style="grid-column:1/-1">
+        <label>Productos que aplican *</label>
+        <div id="promo_productos" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:160px;overflow-y:auto;border:1px solid var(--borde);border-radius:var(--radio);padding:10px;margin-top:4px"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secundario" onclick="cerrarModal('modalPromocion')">Cancelar</button>
+      <button class="btn btn-primario" onclick="guardarPromocion()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script src="api.js"></script>
+<script>
+// ══ Estado global ══
+let seccionActual = 'sucursales';
+let editandoId    = null;
+let catalogos     = { sucursales: [], categorias: [], productos: [], empleados: [], clientes: [], promociones: [] };
+
+// ══ Utilidades ══
+function toast(msg, tipo = 'exito') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `show ${tipo}`;
+  setTimeout(() => t.className = '', 2800);
+}
+function fmt(n)  { return '$' + Number(n).toFixed(2); }
+function fmtFecha(f) { return f ? f.substring(0,10) : '—'; }
+function badgeEstatus(e) {
+  const m = { activa:'badge-verde', activo:'badge-verde', disponible:'badge-verde', vigente:'badge-verde',
+              cerrada:'badge-rojo', inactivo:'badge-rojo', 'no disponible':'badge-rojo',
+              expirada:'badge-gris', futura:'badge-azul' };
+  return `<span class="badge ${m[e]||'badge-gris'}">${e}</span>`;
+}
+function filtrarTabla(tbId, texto) {
+  const rows = document.querySelectorAll(`#${tbId} tbody tr`);
+  texto = texto.toLowerCase();
+  rows.forEach(r => { r.style.display = r.textContent.toLowerCase().includes(texto) ? '' : 'none'; });
+}
+function abrirModal(tipo) {
+  editandoId = null;
+  document.getElementById(`modal${tipo.charAt(0).toUpperCase()+tipo.slice(1)}`).classList.add('abierto');
+}
+function cerrarModal(id) {
+  document.getElementById(id).classList.remove('abierto');
+  editandoId = null;
+}
+
+// ══ Secciones ══
+function verSeccion(sec) {
+  document.querySelectorAll('.cat-tab').forEach((t,i) => {
+    const names = ['sucursales','categorias','productos','empleados','clientes','promociones'];
+    t.classList.toggle('activo', names[i] === sec);
+  });
+  ['sucursales','categorias','productos','empleados','clientes','promociones'].forEach(s =>
+    document.getElementById(`sec-${s}`).style.display = s === sec ? '' : 'none'
+  );
+  seccionActual = sec;
+  cargarSeccion(sec);
+}
+
+function cargarSeccion(sec) {
+  const map = { sucursales: cargarSucursales, categorias: cargarCategorias,
+    productos: cargarProductos, empleados: cargarEmpleados,
+    clientes: cargarClientes, promociones: cargarPromociones };
+  map[sec]?.();
+}
+
+// ══ SUCURSALES ══
+async function cargarSucursales() {
+  try {
+    catalogos.sucursales = await api.getSucursales();
+    const body = document.getElementById('bodySuc');
+    if (!catalogos.sucursales.length) { body.innerHTML = '<tr><td colspan="6" class="vacio">Sin sucursales registradas.</td></tr>'; return; }
+    body.innerHTML = catalogos.sucursales.map(s => `
+      <tr>
+        <td><strong>${s.nombre}</strong></td>
+        <td>${s.ciudad}</td>
+        <td>${s.direccion}</td>
+        <td>${s.telefono}</td>
+        <td>${badgeEstatus(s.estatus)}</td>
+        <td>
+          <button class="btn btn-secundario btn-icono" onclick="editarSucursal(${s.id_sucursal})">✏️ Editar</button>
+          <button class="btn btn-peligro btn-icono" onclick="bajaSucursal(${s.id_sucursal})">🚫 Dar de baja</button>
+        </td>
+      </tr>`).join('');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function editarSucursal(id) {
+  const s = catalogos.sucursales.find(x => x.id_sucursal === id);
+  if (!s) return;
+  editandoId = id;
+  document.getElementById('suc_nombre').value    = s.nombre;
+  document.getElementById('suc_ciudad').value    = s.ciudad;
+  document.getElementById('suc_direccion').value = s.direccion;
+  document.getElementById('suc_telefono').value  = s.telefono;
+  document.getElementById('suc_estatus').value   = s.estatus;
+  document.getElementById('tituloSuc').textContent = 'Editar Sucursal';
+  document.getElementById('modalSucursal').classList.add('abierto');
+}
+
+async function guardarSucursal() {
+  const data = {
+    nombre:    document.getElementById('suc_nombre').value.trim(),
+    ciudad:    document.getElementById('suc_ciudad').value.trim(),
+    direccion: document.getElementById('suc_direccion').value.trim(),
+    telefono:  document.getElementById('suc_telefono').value.trim(),
+    estatus:   document.getElementById('suc_estatus').value,
+  };
+  if (!data.nombre || !data.ciudad || !data.direccion || !data.telefono)
+    return toast('Completa todos los campos obligatorios.', 'error');
+  try {
+    if (editandoId) await api.editarSucursal(editandoId, data);
+    else            await api.crearSucursal(data);
+    cerrarModal('modalSucursal');
+    toast(editandoId ? 'Sucursal actualizada.' : 'Sucursal creada.');
+    cargarSucursales();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function bajaSucursal(id) {
+  if (!confirm('¿Dar de baja esta sucursal?')) return;
+  try { await api.bajaSucursal(id); toast('Sucursal dada de baja.'); cargarSucursales(); }
+  catch(e) { toast(e.message, 'error'); }
+}
+
+// ══ CATEGORIAS ══
+async function cargarCategorias() {
+  try {
+    catalogos.categorias = await api.getCategorias();
+    const body = document.getElementById('bodyCat');
+    if (!catalogos.categorias.length) { body.innerHTML = '<tr><td colspan="3" class="vacio">Sin categorías.</td></tr>'; return; }
+    body.innerHTML = catalogos.categorias.map(c => `
+      <tr>
+        <td><strong>${c.nombre}</strong></td>
+        <td>${c.descripcion || '—'}</td>
+        <td><button class="btn btn-secundario btn-icono" onclick="editarCategoria(${c.id_categoria})">✏️ Editar</button></td>
+      </tr>`).join('');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function editarCategoria(id) {
+  const c = catalogos.categorias.find(x => x.id_categoria === id);
+  if (!c) return;
+  editandoId = id;
+  document.getElementById('cat_nombre').value = c.nombre;
+  document.getElementById('cat_desc').value   = c.descripcion || '';
+  document.getElementById('tituloCat').textContent = 'Editar Categoría';
+  document.getElementById('modalCategoria').classList.add('abierto');
+}
+
+async function guardarCategoria() {
+  const data = { nombre: document.getElementById('cat_nombre').value.trim(), descripcion: document.getElementById('cat_desc').value.trim() };
+  if (!data.nombre) return toast('El nombre es obligatorio.', 'error');
+  try {
+    if (editandoId) await api.editarCategoria(editandoId, data);
+    else            await api.crearCategoria(data);
+    cerrarModal('modalCategoria');
+    toast(editandoId ? 'Categoría actualizada.' : 'Categoría creada.');
+    cargarCategorias();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ══ PRODUCTOS ══
+async function cargarProductos() {
+  try {
+    const cat = document.getElementById('filtroCategoria')?.value;
+    catalogos.productos = await api.getProductos(cat);
+    const body = document.getElementById('bodyProd');
+    if (!catalogos.productos.length) { body.innerHTML = '<tr><td colspan="6" class="vacio">Sin productos.</td></tr>'; return; }
+    body.innerHTML = catalogos.productos.map(p => `
+      <tr>
+        <td><strong>${p.nombre}</strong><br><span class="texto-muted">${p.descripcion||''}</span></td>
+        <td>${p.categoria_nombre}</td>
+        <td>${fmt(p.precio_actual)}</td>
+        <td>${fmt(p.costo_preparacion)}</td>
+        <td>${badgeEstatus(p.estatus)}</td>
+        <td>
+          <button class="btn btn-secundario btn-icono" onclick="editarProducto(${p.id_producto})">✏️ Editar</button>
+          <button class="btn btn-peligro btn-icono" onclick="bajaProducto(${p.id_producto})">🚫 Baja</button>
+        </td>
+      </tr>`).join('');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function abrirModalProducto() {
+  // Llenar select de categorias
+  if (!catalogos.categorias.length) catalogos.categorias = await api.getCategorias();
+  const sel = document.getElementById('prod_categoria');
+  sel.innerHTML = catalogos.categorias.map(c => `<option value="${c.id_categoria}">${c.nombre}</option>`).join('');
+  abrirModal('producto');
+}
+
+async function editarProducto(id) {
+  const p = catalogos.productos.find(x => x.id_producto === id);
+  if (!p) return;
+  editandoId = id;
+  if (!catalogos.categorias.length) catalogos.categorias = await api.getCategorias();
+  const sel = document.getElementById('prod_categoria');
+  sel.innerHTML = catalogos.categorias.map(c => `<option value="${c.id_categoria}">${c.nombre}</option>`).join('');
+  document.getElementById('prod_nombre').value    = p.nombre;
+  document.getElementById('prod_desc').value      = p.descripcion || '';
+  document.getElementById('prod_categoria').value = p.id_categoria;
+  document.getElementById('prod_precio').value    = p.precio_actual;
+  document.getElementById('prod_costo').value     = p.costo_preparacion;
+  document.getElementById('prod_estatus').value   = p.estatus;
+  document.getElementById('tituloProd').textContent = 'Editar Producto';
+  document.getElementById('modalProducto').classList.add('abierto');
+}
+
+async function guardarProducto() {
+  const data = {
+    id_categoria:      parseInt(document.getElementById('prod_categoria').value),
+    nombre:            document.getElementById('prod_nombre').value.trim(),
+    descripcion:       document.getElementById('prod_desc').value.trim(),
+    precio_actual:     parseFloat(document.getElementById('prod_precio').value),
+    costo_preparacion: parseFloat(document.getElementById('prod_costo').value),
+    estatus:           document.getElementById('prod_estatus').value,
+  };
+  if (!data.nombre || !data.precio_actual) return toast('Completa los campos obligatorios.', 'error');
+  try {
+    if (editandoId) await api.editarProducto(editandoId, data);
+    else            await api.crearProducto(data);
+    cerrarModal('modalProducto');
+    toast(editandoId ? 'Producto actualizado.' : 'Producto creado.');
+    cargarProductos();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function bajaProducto(id) {
+  if (!confirm('¿Dar de baja este producto?')) return;
+  try { await api.bajaProducto(id); toast('Producto dado de baja.'); cargarProductos(); }
+  catch(e) { toast(e.message, 'error'); }
+}
+
+// ══ EMPLEADOS ══
+async function cargarEmpleados() {
+  try {
+    const suc = document.getElementById('filtroSucEmp')?.value;
+    catalogos.empleados = await api.getEmpleados(suc);
+    const body = document.getElementById('bodyEmp');
+    if (!catalogos.empleados.length) { body.innerHTML = '<tr><td colspan="7" class="vacio">Sin empleados.</td></tr>'; return; }
+    body.innerHTML = catalogos.empleados.map(e => `
+      <tr>
+        <td><strong>${e.nombre_completo}</strong></td>
+        <td>${e.puesto}</td>
+        <td>${e.sucursal_nombre}</td>
+        <td>${fmt(e.salario_quincenal)}</td>
+        <td>${fmtFecha(e.fecha_ingreso)}</td>
+        <td>${badgeEstatus(e.estatus)}</td>
+        <td>
+          <button class="btn btn-secundario btn-icono" onclick="editarEmpleado(${e.id_empleado})">✏️ Editar</button>
+          <button class="btn btn-peligro btn-icono" onclick="bajaEmpleado(${e.id_empleado})">🚫 Baja</button>
+        </td>
+      </tr>`).join('');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function abrirModalEmpleado() {
+  if (!catalogos.sucursales.length) catalogos.sucursales = await api.getSucursales();
+  const sel = document.getElementById('emp_sucursal');
+  sel.innerHTML = catalogos.sucursales.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+  abrirModal('empleado');
+}
+
+async function editarEmpleado(id) {
+  const e = catalogos.empleados.find(x => x.id_empleado === id);
+  if (!e) return;
+  editandoId = id;
+  if (!catalogos.sucursales.length) catalogos.sucursales = await api.getSucursales();
+  const sel = document.getElementById('emp_sucursal');
+  sel.innerHTML = catalogos.sucursales.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+  document.getElementById('emp_nombre').value   = e.nombre_completo;
+  document.getElementById('emp_tel').value      = e.telefono;
+  document.getElementById('emp_puesto').value   = e.puesto;
+  document.getElementById('emp_sucursal').value = e.id_sucursal;
+  document.getElementById('emp_salario').value  = e.salario_quincenal;
+  document.getElementById('emp_fecha').value    = fmtFecha(e.fecha_ingreso);
+  document.getElementById('emp_estatus').value  = e.estatus;
+  document.getElementById('tituloEmp').textContent = 'Editar Empleado';
+  document.getElementById('modalEmpleado').classList.add('abierto');
+}
+
+async function guardarEmpleado() {
+  const data = {
+    id_sucursal:       parseInt(document.getElementById('emp_sucursal').value),
+    nombre_completo:   document.getElementById('emp_nombre').value.trim(),
+    telefono:          document.getElementById('emp_tel').value.trim(),
+    puesto:            document.getElementById('emp_puesto').value,
+    salario_quincenal: parseFloat(document.getElementById('emp_salario').value),
+    fecha_ingreso:     document.getElementById('emp_fecha').value,
+    estatus:           document.getElementById('emp_estatus').value,
+  };
+  if (!data.nombre_completo || !data.fecha_ingreso) return toast('Completa los campos obligatorios.', 'error');
+  try {
+    if (editandoId) await api.editarEmpleado(editandoId, data);
+    else            await api.crearEmpleado(data);
+    cerrarModal('modalEmpleado');
+    toast(editandoId ? 'Empleado actualizado.' : 'Empleado creado.');
+    cargarEmpleados();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function bajaEmpleado(id) {
+  if (!confirm('¿Dar de baja a este empleado?')) return;
+  try { await api.bajaEmpleado(id); toast('Empleado dado de baja.'); cargarEmpleados(); }
+  catch(e) { toast(e.message, 'error'); }
+}
+
+// ══ CLIENTES ══
+async function cargarClientes() {
+  try {
+    catalogos.clientes = await api.getClientes();
+    const body = document.getElementById('bodyCli');
+    if (!catalogos.clientes.length) { body.innerHTML = '<tr><td colspan="6" class="vacio">Sin clientes.</td></tr>'; return; }
+    body.innerHTML = catalogos.clientes.map(c => `
+      <tr>
+        <td><strong>${c.nombre}</strong></td>
+        <td>${c.telefono||'—'}</td>
+        <td>${c.correo||'—'}</td>
+        <td>${c.ciudad||'—'}</td>
+        <td>${fmtFecha(c.fecha_registro)}</td>
+        <td><button class="btn btn-secundario btn-icono" onclick="editarCliente(${c.id_cliente})">✏️ Editar</button></td>
+      </tr>`).join('');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function editarCliente(id) {
+  const c = catalogos.clientes.find(x => x.id_cliente === id);
+  if (!c) return;
+  editandoId = id;
+  document.getElementById('cli_nombre').value  = c.nombre;
+  document.getElementById('cli_tel').value     = c.telefono || '';
+  document.getElementById('cli_correo').value  = c.correo   || '';
+  document.getElementById('cli_ciudad').value  = c.ciudad   || '';
+  document.getElementById('tituloCli').textContent = 'Editar Cliente';
+  document.getElementById('modalCliente').classList.add('abierto');
+}
+
+async function guardarCliente() {
+  const data = {
+    nombre:   document.getElementById('cli_nombre').value.trim(),
+    telefono: document.getElementById('cli_tel').value.trim()    || null,
+    correo:   document.getElementById('cli_correo').value.trim() || null,
+    ciudad:   document.getElementById('cli_ciudad').value.trim() || null,
+  };
+  if (!data.nombre) return toast('El nombre es obligatorio.', 'error');
+  try {
+    if (editandoId) await api.editarCliente(editandoId, data);
+    else            await api.crearCliente(data);
+    cerrarModal('modalCliente');
+    toast(editandoId ? 'Cliente actualizado.' : 'Cliente registrado.');
+    cargarClientes();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ══ PROMOCIONES ══
+async function cargarPromociones() {
+  try {
+    catalogos.promociones = await api.getPromociones();
+    const body = document.getElementById('bodyPromo');
+    if (!catalogos.promociones.length) { body.innerHTML = '<tr><td colspan="6" class="vacio">Sin promociones.</td></tr>'; return; }
+    body.innerHTML = catalogos.promociones.map(p => `
+      <tr>
+        <td><strong>${p.nombre}</strong><br><span class="texto-muted">${p.descripcion||''}</span></td>
+        <td>${p.porcentaje_descuento}%</td>
+        <td>${fmtFecha(p.fecha_inicio)}</td>
+        <td>${fmtFecha(p.fecha_fin)}</td>
+        <td>${badgeEstatus(p.estado_vigencia)}</td>
+        <td><button class="btn btn-secundario btn-icono" onclick="editarPromocion(${p.id_promocion})">✏️ Editar</button></td>
+      </tr>`).join('');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function abrirModalPromocion() {
+  if (!catalogos.productos.length) catalogos.productos = await api.getProductos();
+  renderCheckboxProductos([]);
+  document.getElementById('tituloPromo').textContent = 'Nueva Promoción';
+  editandoId = null;
+  document.getElementById('modalPromocion').classList.add('abierto');
+}
+
+function renderCheckboxProductos(seleccionados) {
+  const div = document.getElementById('promo_productos');
+  div.innerHTML = catalogos.productos.map(p => `
+    <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">
+      <input type="checkbox" value="${p.id_producto}" ${seleccionados.includes(p.id_producto)?'checked':''}> ${p.nombre}
+    </label>`).join('');
+}
+
+async function guardarPromocion() {
+  const productos = [...document.querySelectorAll('#promo_productos input:checked')].map(x => parseInt(x.value));
+  const data = {
+    nombre:               document.getElementById('promo_nombre').value.trim(),
+    descripcion:          document.getElementById('promo_desc').value.trim(),
+    porcentaje_descuento: parseFloat(document.getElementById('promo_pct').value),
+    fecha_inicio:         document.getElementById('promo_inicio').value,
+    fecha_fin:            document.getElementById('promo_fin').value,
+    productos,
+  };
+  if (!data.nombre || !data.fecha_inicio || !data.fecha_fin) return toast('Completa los campos obligatorios.', 'error');
+  if (!productos.length) return toast('Selecciona al menos un producto.', 'error');
+  try {
+    if (editandoId) await api.editarPromocion(editandoId, data);
+    else            await api.crearPromocion(data);
+    cerrarModal('modalPromocion');
+    toast(editandoId ? 'Promoción actualizada.' : 'Promoción creada.');
+    cargarPromociones();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// Sobreescribir botón nuevo para cargar categorias/productos primero
+document.addEventListener('DOMContentLoaded', () => {
+  // Asignar funciones a botones que necesitan datos previos
+  document.querySelectorAll('.cat-tab')[2].onclick = async () => {
+    verSeccion('productos');
+    if (!catalogos.categorias.length) catalogos.categorias = await api.getCategorias();
+    const sel = document.getElementById('filtroCategoria');
+    sel.innerHTML = '<option value="">Todas las categorías</option>' +
+      catalogos.categorias.map(c => `<option value="${c.id_categoria}">${c.nombre}</option>`).join('');
+  };
+
+  // Rellenar select de sucursales para empleados al entrar
+  document.querySelectorAll('.cat-tab')[3].onclick = async () => {
+    verSeccion('empleados');
+    if (!catalogos.sucursales.length) catalogos.sucursales = await api.getSucursales();
+    const sel = document.getElementById('filtroSucEmp');
+    sel.innerHTML = '<option value="">Todas las sucursales</option>' +
+      catalogos.sucursales.map(s => `<option value="${s.id_sucursal}">${s.nombre}</option>`).join('');
+  };
+
+  // Botón nueva promo
+  document.querySelector('#sec-promociones .btn-primario').onclick = abrirModalPromocion;
+  // Botón nuevo producto
+  document.querySelector('#sec-productos .btn-primario').onclick = abrirModalProducto;
+  // Botón nuevo empleado
+  document.querySelector('#sec-empleados .btn-primario').onclick = abrirModalEmpleado;
+
+  cargarSucursales();
+});
+</script>
+</body>
+</html>
